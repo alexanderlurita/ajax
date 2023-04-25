@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejemplo 1 Fetch</title>
+</head>
+<body>
+  <button id="getdata" type="button">Obtener datos</button>
+  <select name="carreras" id="carreras">
+    <option value="">No hay datos</option>
+  </select>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const btCarga = document.getElementById("getdata");
+      const lsCarreras = document.getElementById("carreras");
+
+      //Utilizar API Fetch (AJAX/asíncrono)
+      btCarga.addEventListener("click", () => {
+        
+        //Imprime el json en consola
+        /* fetch("datos.php")
+          .then(response => response.json())
+          .then(datos => console.log(datos)) */
+
+        //Recorre la data e imprime el elemento en consola
+        /* fetch("datos.php")
+          .then(response => response.json())
+          .then(datos => {
+            datos.forEach(element => {
+              console.log(element);
+            });
+          }); */
+
+          //Utilizando fetch poblaremos el <select>
+          fetch("datos.php")
+            .then(response => response.json())
+            .then(datos => {
+              lsCarreras.innerHTML = "<option value=''>Seleccione</option>";
+              datos.forEach(element => {
+                const optionTag = document.createElement("option");
+                optionTag.value = element.codigo;
+                optionTag.text = element.nombre;
+                lsCarreras.appendChild(optionTag);
+              });
+            });
+            
+      });
+    });
+  </script>
+</body>
+</html>
