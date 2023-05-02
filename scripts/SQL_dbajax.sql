@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS dbajax;
 CREATE DATABASE dbajax;
 USE dbajax;
 
@@ -20,3 +21,15 @@ INSERT INTO productos (nombre, marca, precio)
 ALTER TABLE productos ADD CONSTRAINT uk_nombre UNIQUE (nombre, marca);
 		
 SELECT * FROM productos;
+
+CREATE TABLE personas
+(
+	idpersona		INT AUTO_INCREMENT PRIMARY KEY,
+	apellidos		VARCHAR(30)		NOT NULL,
+	nombres			VARCHAR(30)		NOT NULL,
+	fotografia		VARCHAR(90)		NULL,
+	create_at		DATETIME			NOT NULL DEFAULT NOW(),
+	update_at 		DATETIME			NULL
+) ENGINE = INNODB;
+
+SELECT * FROM personas;

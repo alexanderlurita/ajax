@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=
-  , initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CRUD utilizando FETCH</title>
 
   <!-- Bootstrap 5.2 -->
@@ -64,6 +63,44 @@
     </div> <!-- Fin de primer row -->
   </div> <!-- Fin container -->
 
+  <!-- Modales -->
+  <div class="modal fade" id="modal-productos" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" aria-labelledby="modalTitleId" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-info text-light">
+          <h5 class="modal-title" id="modalTitleId">Actualizar datos</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form action="">
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Nombre del producto:</label>
+              <input type="text" class="form-control form-control-sm" id="md-nombre">
+            </div>
+            <div class="mb-3">
+              <label for="marca" class="form-label">Marca:</label>
+              <input type="text" class="form-control form-control-sm" id="md-marca">
+            </div>
+            <div class="mb-3">
+              <label for="precio" class="form-label">Precio:</label>
+              <input type="text" class="form-control form-control-sm text-end" id="md-precio">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" id="actualizar" class="btn btn-sm btn-primary">Actualizar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Fin modales -->
+
+  <!-- Librerias Bootstrap 5 -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
+
   <script>
     document.addEventListener("DOMContentLoaded", () => {
 
@@ -75,6 +112,14 @@
 
       const tablaProductos = document.querySelector("#tbproducts");
       const cuerpoTabla = tablaProductos.querySelector("tbody");
+
+      //Creamos un modal como OBJETO
+      const modal = new bootstrap.Modal(document.querySelector("#modal-productos"));
+      let idproducto = 0; //varible que será reasignada
+      const txMdNombre = document.getElementById("md-nombre");
+      const txMdMarca = document.getElementById("md-marca");
+      const txMdPrecio = document.getElementById("md-precio");
+      const btActualizar = document.getElementById("actualizar");
 
       //Funciones
       //Obtiene los datos de la tabla y los muesrta en <tbody>
@@ -97,11 +142,11 @@
                   <td>${element.marca}</td>  
                   <td>${element.precio}</td> 
                   <td>
-                    <a href='#' class='btn btn-info btn-sm'>
-                      <i class="bi bi-pen-fill"></i>
+                    <a href='#' class='editar btn btn-info btn-sm' data-idproducto='${element.idproducto}'>
+                      editar
                     </a>  
-                    <a href='#' class='btn btn-danger btn-sm'>
-                      <i class="bi bi-trash-fill"></i>  
+                    <a href='#' class='eliminar btn btn-danger btn-sm' data-idproducto='${element.idproducto}'>
+                      eliminar  
                     </a>  
                   </td> 
                 </tr>
@@ -111,6 +156,60 @@
           });
 
       }
+
+      //Evento para manipular botones EDITAR (asíncronos)
+      cuerpoTabla.addEventListener("click", (event) => {
+        if(event.target.classList[0] === 'editar') {
+          //Obtener el idproducto
+          idproducto = parseInt(event.target.dataset.idproducto);
+          const parametros = new URLSearchParams();
+          parametros.append("operacion", "obtener");
+          parametros.append("idproducto", idproducto);
+
+          fetch("productos.php", {
+            method: 'POST',
+            body: parametros
+          })
+            .then(response => response.json())
+            .then(datos => {
+              document.querySelector("#md-nombre").value = datos.nombre;
+              document.querySelector("#md-marca").value = datos.marca;
+              document.querySelector("#md-precio").value = datos.precio;
+            })
+          
+          //Apertura del modal
+          modal.toggle();
+        }
+      })
+
+      //Evento para manipular los botones ELIMINAR (asíncronos)
+      cuerpoTabla.addEventListener("click", (event) => {
+        //Determinar cuales son los botones
+        if (event.target.classList[0] === 'eliminar') {
+          if (confirm("¿Está seguro de eliminar el registro?")) {
+            //Obtenemos el idproducto contenido en el atributo data-x
+            idproducto = parseInt(event.target.dataset.idproducto);
+            const parametros = new URLSearchParams(); //Datos no binarios
+            parametros.append("operacion", "eliminar");
+            parametros.append("idproducto", idproducto);
+
+            //AJAX
+            fetch("productos.php", {
+              method: 'POST',
+              body: parametros
+            })
+              .then(response => response.json())
+              .then(datos => {
+                if (datos.status) {
+                  renderData();
+                } else {
+                  alert(datos.message);
+                }
+              })
+
+          }
+        }
+      });
 
       function registerProduct() {
         if (confirm("¿Estás seguro de grabar?")) {
@@ -138,8 +237,41 @@
         }
       }
 
+      function updateProduct() {
+        const fd = new FormData();
+        fd.append("operacion", "editar");
+        fd.append("nombre", txMdNombre.value);
+        fd.append("marca", txMdMarca.value);
+        fd.append("precio", txMdPrecio.value);
+        fd.append("idproducto", idproducto);
+
+        fetch("productos.php", {
+          method: 'POST',
+          body: fd
+        })
+          .then(response => response.json())
+          .then(datos => {
+            if (datos.status) {
+              alert("Actualizado correctamente");
+              renderData();
+            } else {
+              alert(datos.message);
+            }
+
+            modal.toggle();
+          })
+      }
+
       //Eventos
       btGuardar.addEventListener("click", registerProduct);
+
+      btActualizar.addEventListener("click", updateProduct);
+
+      //Enviar el enfoque a un componente del modal
+      modal._element.addEventListener("shown.bs.modal", () => {
+        //Este código se ejecuta en el instante cuando el MODAL está en pantalla
+        document.querySelector("#md-nombre").focus();
+      });
 
       //Render automáticos
       renderData();

@@ -93,6 +93,7 @@
             if (response.ok){
               return response.json()
             } else {
+              resetBoxes();
               alert("No encontramos al personaje");
               throw new Error(`No se encontró el dato: ${response.status}`);
             }

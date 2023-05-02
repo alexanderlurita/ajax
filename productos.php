@@ -50,6 +50,57 @@ if (isset($_POST['operacion'])) {
 
     echo json_encode($respuesta);
   }
+  
+  if ($_POST['operacion'] == 'eliminar') {
+    $respuesta = [
+      "status"  => false,
+      "message" => ""
+    ];
+    try {
+      $consulta = $conexion->prepare("DELETE FROM productos WHERE idproducto = ?");
+      $respuesta["status"] = $consulta->execute(array($_POST['idproducto']));
+    } catch(Exception $e) {
+      $respuesta["message"] = "No se pudo eliminar registro. Código error: " . $e->getCode();
+    }
+
+    echo json_encode($respuesta);
+  }
+
+  if ($_POST['operacion'] == 'obtener') {
+    try {
+      $consulta = $conexion->prepare("SELECT * FROM productos WHERE idproducto = ?");
+      $consulta->execute(array($_POST['idproducto']));
+      $resultado = $consulta->fetch(PDO::FETCH_ASSOC); //return (método)
+    } catch(Exception $e) {
+      die($e->getMessage());
+    }
+
+    //Si esto fuera un método esta línea va en el CONTROLLER
+    echo json_encode($resultado);
+  }
+
+  if ($_POST['operacion'] == 'editar') {
+    $respuesta = [
+      "status"  => false,
+      "message" => ""
+    ];
+    
+    try {
+      $consulta = $conexion->prepare("UPDATE productos SET nombre=?, marca=?, precio=?, update_at=NOW() WHERE idproducto=?");
+      $respuesta["status"] = $consulta->execute(
+        array(
+          $_POST['nombre'],
+          $_POST['marca'],
+          $_POST['precio'],
+          $_POST['idproducto']
+        )
+      );
+    } catch(Exception $e) {
+      $respuesta["message"] = "No se completó el proceso, código de error: " . $e->getCode();
+    }
+
+    echo json_encode($respuesta);
+  }
 
 }
 

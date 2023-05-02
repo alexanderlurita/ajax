@@ -49,6 +49,7 @@
         fetch("https://jsonplaceholder.typicode.com/users")
           .then(response => response.json())
           .then(datos => {
+            cuerpoTabla.innerHTML = '';
             datos.forEach(element => {
               //Objeto que contenga la información de la fila
               let fila = `
